@@ -49,7 +49,13 @@ export const ConversationDetail = () => {
           {selectedConversation.messages.map((message, index) => (
             <MessageBubble 
               key={index}
-              message={message}
+              message={{
+                id: message.id,
+                text: message.text,
+                timestamp: message.timestamp,
+                sender: message.sender === "user" ? "customer" : "agent",
+                attachments: message.attachments,
+              }}
               isUser={message.sender === "user"}
               userName={selectedConversation.user.name}
             />
