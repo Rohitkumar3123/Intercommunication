@@ -1,50 +1,52 @@
-
-import { cn } from "@/lib/utils";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
-import { useConversation } from "@/contexts/ConversationContext";
+import { CheckCheck } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Conversation } from "@/types";
 
 interface ConversationItemProps {
   conversation: Conversation;
   onClick: () => void;
 }
 
-export const ConversationItem = ({ conversation, onClick }: ConversationItemProps) => {
-  const { selectedConversation } = useConversation();
-  const isSelected = selectedConversation?.id === conversation.id;
-  
+export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation, onClick }) => {
+  const { customer, lastMessage, status, unread } = conversation;
+
+  const timeAgo = formatDistanceToNow(lastMessage.timestamp, {
+    addSuffix: true,
+  });
+
   return (
-    <div 
-      className={cn(
-        "flex items-start p-3 rounded-md cursor-pointer hover:bg-gray-100",
-        isSelected ? "bg-gray-100" : ""
-      )}
+    <button
       onClick={onClick}
+      className={cn(
+        "flex items-center space-x-3 p-3 w-full rounded-md hover:bg-secondary transition-colors",
+        unread ? "bg-secondary" : "bg-transparent"
+      )}
     >
-      <Avatar className="h-10 w-10 mr-3 mt-0.5">
-        <img src={conversation.user.avatar} alt={conversation.user.name} />
-      </Avatar>
-      
-      <div className="flex-1 min-w-0">
+      <Avatar
+        src={customer.avatar}
+        alt={customer.name}
+        className="h-8 w-8"
+      />
+      <div className="flex-1">
         <div className="flex items-center justify-between">
-          <p className="font-medium truncate">{conversation.user.name}</p>
-          <span className="text-xs text-muted-foreground whitespace-nowrap">
-            {formatDistanceToNow(conversation.lastMessage.timestamp, { addSuffix: true })}
-          </span>
-        </div>
-        
-        <p className="text-sm text-muted-foreground truncate">{conversation.lastMessage.text}</p>
-        
-        <div className="flex items-center mt-1">
-          {conversation.status === "active" && (
-            <Badge variant="default" className="bg-green-500 text-white text-xs">Active</Badge>
-          )}
-          {conversation.status === "waiting" && (
-            <Badge variant="outline" className="text-orange-500 border-orange-500 text-xs">Waiting</Badge>
+          <p className="text-sm font-medium">{customer.name}</p>
+          {status === "resolved" && (
+            <Badge variant="secondary">
+              <CheckCheck className="h-3 w-3 mr-1" />
+              Resolved
+            </Badge>
           )}
         </div>
+        <p className="text-xs text-muted-foreground">
+          {lastMessage.text.length > 50
+            ? lastMessage.text.substring(0, 50) + "..."
+            : lastMessage.text}
+        </p>
       </div>
-    </div>
+      <div className="text-xs text-muted-foreground">{timeAgo}</div>
+    </button>
   );
 };

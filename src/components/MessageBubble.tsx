@@ -1,51 +1,56 @@
-
-import { cn } from "@/lib/utils";
 import { Avatar } from "@/components/ui/avatar";
-import { format } from "date-fns";
-import { User, Bot } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { cn } from "@/lib/utils";
+import { useUser } from "@/contexts/UserContext";
+import { Message } from "@/types";
 
 interface MessageBubbleProps {
   message: Message;
-  isUser: boolean;
-  userName: string;
 }
 
-export const MessageBubble = ({ message, isUser, userName }: MessageBubbleProps) => {
-  const timestamp = format(message.timestamp, 'h:mm a');
-  
+export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
+  const { currentUser } = useUser();
+  const isCurrentUser = message.sender === "agent" && currentUser.id === "admin-1";
+
   return (
     <div className={cn(
-      "flex mb-4",
-      isUser ? "flex-row-reverse" : ""
+      "flex w-full py-2",
+      isCurrentUser ? "justify-end" : "justify-start"
     )}>
-      <Avatar className={cn("h-8 w-8", isUser ? "ml-2" : "mr-2")}>
-        {isUser ? (
-          <img src={`https://api.dicebear.com/7.x/personas/svg?seed=${userName}`} alt="User" />
-        ) : (
-          <div className="bg-primary flex items-center justify-center text-white">
-            <Bot size={16} />
-          </div>
-        )}
-      </Avatar>
-      
       <div className={cn(
-        "max-w-[70%]",
+        "flex flex-col space-y-2 text-sm max-w-[80%]",
+        isCurrentUser ? "items-end" : "items-start"
       )}>
         <div className={cn(
-          "px-4 py-2 rounded-lg inline-block",
-          isUser 
-            ? "bg-primary text-primary-foreground rounded-tr-none" 
-            : "bg-secondary text-secondary-foreground rounded-tl-none"
+          "px-3 py-2 rounded-lg",
+          isCurrentUser ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"
         )}>
-          <p className="whitespace-pre-wrap">{message.text}</p>
+          <p className="text-sm">{message.text}</p>
+          {message.attachments && message.attachments.length > 0 && (
+            <div className="mt-2">
+              {message.attachments.map((attachment, index) => (
+                <a
+                  key={index}
+                  href={attachment}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 underline"
+                >
+                  Attachment {index + 1}
+                </a>
+              ))}
+            </div>
+          )}
         </div>
-        <div className={cn(
-          "text-xs text-muted-foreground mt-1",
-          isUser ? "text-right" : "text-left"
-        )}>
-          {timestamp}
-        </div>
+        <span className="text-xs text-muted-foreground">
+          {formatDistanceToNow(message.timestamp, { addSuffix: true })}
+        </span>
       </div>
+      {!isCurrentUser && (
+        <Avatar className="ml-3 h-8 w-8">
+          <img src="https://github.com/shadcn.png" alt="Customer Avatar" />
+        </Avatar>
+      )}
     </div>
   );
 };
