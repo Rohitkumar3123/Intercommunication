@@ -1,4 +1,5 @@
-import { Avatar } from "@/components/ui/avatar";
+
+import { AvatarImage, Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { CheckCheck } from "lucide-react";
@@ -25,11 +26,10 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation
         unread ? "bg-secondary" : "bg-transparent"
       )}
     >
-      <Avatar
-        src={customer.avatar}
-        alt={customer.name}
-        className="h-8 w-8"
-      />
+      <Avatar className="h-8 w-8">
+        <AvatarImage src={customer.avatar} alt={customer.name} />
+        <AvatarFallback>{customer.name.charAt(0)}</AvatarFallback>
+      </Avatar>
       <div className="flex-1">
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium">{customer.name}</p>

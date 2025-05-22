@@ -5,9 +5,28 @@ import { Search, Filter } from "lucide-react";
 import { ConversationItem } from "./ConversationItem";
 import { useConversation } from "@/contexts/ConversationContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Conversation } from "@/types";
 
 export const ConversationsPanel = () => {
   const { conversations, selectConversation } = useConversation();
+  
+  // Map conversations from the context to match the expected Conversation type
+  const mappedConversations: Conversation[] = conversations.map(conv => ({
+    id: conv.id,
+    customer: {
+      id: conv.user.id,
+      name: conv.user.name,
+      email: conv.user.email,
+      avatar: conv.user.avatar,
+    },
+    lastMessage: {
+      text: conv.lastMessage.text,
+      timestamp: conv.lastMessage.timestamp,
+      sender: conv.messages.length > 0 && conv.messages[conv.messages.length - 1].sender === 'user' ? 'customer' : 'agent',
+    },
+    status: conv.status === 'active' ? 'active' : conv.status === 'closed' ? 'resolved' : 'pending',
+    unread: false,
+  }));
   
   return (
     <div className="h-full flex flex-col border-r">
@@ -28,7 +47,7 @@ export const ConversationsPanel = () => {
       
       <ScrollArea className="flex-1">
         <div className="p-2">
-          {conversations.map((conversation) => (
+          {mappedConversations.map((conversation) => (
             <ConversationItem
               key={conversation.id}
               conversation={conversation}
